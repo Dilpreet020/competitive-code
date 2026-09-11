@@ -1,0 +1,165 @@
+Approach: Palindrome Linked List
+The idea is to check whether the linked list reads the same forward and backward.
+
+We can do this in O(n) time and O(1) extra space using three steps:
+
+Find the middle of the linked list.
+Reverse the second half.
+Compare the first half with the reversed second half.
+1. Find the middle using Slow & Fast pointers
+ListNode *slow = head, *fast = head;
+
+slow moves one step
+fast moves two steps
+while (fast && fast->next)
+    slow = slow->next, fast = fast->next->next;
+
+When the loop ends, slow is at the middle of the list.
+
+For:
+
+1 → 2 → 3 → 2 → 1
+
+slow reaches:
+
+1 → 2 → 3 ← slow
+
+2. Reverse the second half
+Your code starts reversing from the node after slow:
+
+prev = slow;
+slow = slow->next;
+prev->next = NULL;
+
+Then:
+
+while (slow)
+    temp = slow->next,
+    slow->next = prev,
+    prev = slow,
+    slow = temp;
+
+The important idea is:
+
+Before:
+
+1 → 2 → 3    2 → 1
+             ↑
+          second half
+
+After reversing:
+
+1 → 2 → 3 ← 2 ← 1
+
+prev becomes the head of the reversed portion.
+
+3. Compare both halves
+Now:
+
+fast = head;
+slow = prev;
+
+So:
+
+fast starts from the beginning.
+slow starts from the end of the original list, because the second half has been reversed.
+Then compare:
+
+while (slow)
+    if (fast->val != slow->val)
+        return false;
+    else
+        fast = fast->next,
+        slow = slow->next;
+
+If any pair is different:
+
+return false;
+
+Otherwise, all corresponding values match:
+
+return true;
+
+Example
+For:
+
+1 → 2 → 3 → 2 → 1
+
+After finding the middle:
+
+First half:   1 → 2 → 3
+Second half:  2 → 1
+
+Reverse second half:
+
+First half:   1 → 2 → 3
+Reversed:           1 ← 2
+
+Comparison:
+
+1 == 1 ✓
+2 == 2 ✓
+
+All match → Palindrome.
+
+For:
+
+1 → 2 → 3 → 4
+
+the comparison will eventually find:
+
+1 != 4
+
+→ false.
+
+Why prev = slow?
+This part can initially look confusing:
+
+prev = slow;
+slow = slow->next;
+prev->next = NULL;
+
+Here slow is the middle node, and the code includes the middle node in the reversed portion.
+
+For an odd-length list:
+
+1 → 2 → 3 → 2 → 1
+          ↑
+        middle
+
+It temporarily separates:
+
+1 → 2 → 3
+
+2 → 1
+
+and then reverses the second part while using 3 as the starting prev.
+
+The comparison only continues while slow is non-null, so the middle node doesn't cause a problem.
+
+Complexity
+Finding middle → O(n)
+Reversing second half → O(n)
+Comparing → O(n)
+Therefore:
+
+Time Complexity:  O(n)
+Space Complexity: O(1)
+
+Code-
+class Solution {
+public:
+    bool isPalindrome(ListNode* head) {
+        ListNode *slow = head, *fast = head, *prev, *temp;
+        while (fast && fast->next)
+            slow = slow->next, fast = fast->next->next;
+        prev = slow, slow = slow->next, prev->next = NULL;
+        while (slow)
+            temp = slow->next, slow->next = prev, prev = slow, slow = temp;
+        fast = head, slow = prev;
+        while (slow)
+            if (fast->val != slow->val) return false;
+            else fast = fast->next, slow = slow->next;
+        return true;
+    }
+};
