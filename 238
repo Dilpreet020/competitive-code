@@ -1,0 +1,148 @@
+Approach: Product of Array Except Self
+The main idea is to calculate the product of all elements to the left of each index and multiply it by the product of all elements to the right.
+
+For every index i:
+
+answer[i] = product of elements before i × product of elements after i
+
+We do this in two passes without using division.
+
+1. Prefix Product — Left to Right
+We maintain a variable pre that stores the product of all elements before the current index.
+
+Initially:
+
+pre = 1;
+
+For every i:
+
+res[i] = pre;
+pre *= nums[i];
+
+Example:
+
+nums = [1, 2, 3, 4]
+
+After first pass:
+
+res = [1, 1, 2, 6]
+
+Why?
+
+index 0 → nothing on left → 1
+index 1 → 1           → 1
+index 2 → 1 × 2       → 2
+index 3 → 1 × 2 × 3   → 6
+
+So now res[i] contains the prefix product.
+
+2. Suffix Product — Right to Left
+Now we need the product of all elements after i.
+
+Maintain another variable:
+
+suf = 1;
+
+Traverse from right to left:
+
+res[i] *= suf;
+suf *= nums[i];
+
+Using:
+
+nums = [1, 2, 3, 4]
+
+Before second pass:
+res = [1, 1, 2, 6]
+
+Process from right:
+
+i = 3
+res[3] = 6 × 1 = 6
+suf = 4
+
+i = 2
+res[2] = 2 × 4 = 8
+suf = 12
+
+i = 1
+res[1] = 1 × 12 = 12
+suf = 24
+
+i = 0
+res[0] = 1 × 24 = 24
+
+Final:
+
+res = [24, 12, 8, 6]
+
+3. Why this works
+At the end:
+
+res[i] = prefix product × suffix product
+
+which is exactly:
+
+product of everything except nums[i]
+
+For example, at index 2:
+
+nums = [1, 2, 3, 4]
+
+left product  = 1 × 2 = 2
+right product = 4
+
+answer[2] = 2 × 4 = 8
+
+Why no division?
+A common approach is:
+
+total product / nums[i]
+
+But that fails when the array contains 0.
+
+This two-pass prefix/suffix approach handles zeros naturally.
+
+Example:
+
+nums = [1, 2, 0, 4]
+
+answer = [0, 0, 8, 0]
+
+No special zero handling is required.
+
+Complexity
+First loop → O(n)
+Second loop → O(n)
+Total → O(n)
+Result array → O(n)
+Extra variables pre and suf → O(1)
+So:
+
+Time Complexity:  O(n)
+Space Complexity: O(n)
+
+
+CODE-
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+
+        int n = nums.size();
+        vector<int> res(n);
+
+        int pre = 1;
+        for(int i = 0; i < n; i++){
+            res[i] = pre;
+            pre *= nums[i];
+        }
+
+        int suf = 1;
+        for(int i = n - 1; i >= 0; i--){
+            res[i] *= suf;
+            suf *= nums[i];
+        }
+
+        return res;
+    }
+};
