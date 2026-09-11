@@ -1,0 +1,194 @@
+Approach: Largest Rectangle in Histogram
+The main idea is to find, for every bar, how far it can extend to the left and right while maintaining its height.
+
+For a bar i with height heights[i]:
+
+PSE[i] = index of the first smaller element on the left.
+NSE[i] = index of the first smaller element on the right.
+Therefore, the bar can extend from PSE[i] + 1 to NSE[i] - 1.
+So:
+
+width = NSE[i] - PSE[i] - 1
+
+and
+
+area = width × heights[i]
+
+
+
+Learn more
+1. Find NSE — Next Smaller Element
+Traverse right to left using a monotonic increasing stack.
+
+For each index i:
+
+Remove elements from the stack while their height is >= heights[i].
+After removing:
+If stack is empty → no smaller element exists → NSE[i] = n
+Otherwise → NSE[i] = st.top()
+Push i.
+For example:
+
+heights = [2, 1, 5, 6, 2, 3]
+
+NSE = [1, 6, 4, 4, 6, 6]
+
+2. Find PSE — Previous Smaller Element
+Traverse left to right.
+
+For each index i:
+
+Remove elements whose height is >= heights[i].
+After removing:
+If stack is empty → PSE[i] = -1
+Otherwise → PSE[i] = st.top()
+Push i.
+For the same example:
+
+PSE = [-1, -1, 1, 2, 1, 4]
+
+3. Calculate the maximum area
+Now every bar knows its left and right boundaries.
+
+For each i:
+
+int width = NSE[i] - PSE[i] - 1;
+int area = width * heights[i];
+
+maxi = max(maxi, area);
+
+For:
+
+[2, 1, 5, 6, 2, 3]
+
+Consider height 5 at index 2:
+
+PSE[2] = 1
+NSE[2] = 4
+
+width = 4 - 1 - 1
+      = 2
+
+area = 2 * 5
+     = 10
+
+So the maximum rectangle is 10.
+
+Why the stack works
+The stack maintains indices whose heights are in increasing order.
+
+When we encounter a smaller height, we pop taller bars because we have just discovered their boundary.
+
+Each index is:
+
+pushed once
+popped at most once
+Therefore, although there is a while loop, the total stack operations are linear.
+
+Complexity
+Your complexity comments can be simplified:
+
+getNSE() → O(n)
+getPSE() → O(n)
+Final loop → O(n)
+Total → O(n)
+Extra space → O(n)
+So the final complexity is:
+
+Time Complexity:  O(n)
+Space Complexity: O(n)
+
+
+
+Code-
+class Solution {
+public:
+    vector<int> getNSE( vector<int>& heights , int n ) {
+
+        stack<int> st ;
+        vector<int> NSE(n,0) ;
+
+        for ( int i = n-1 ; i >= 0 ; i-- ) {
+
+            while( !st.empty() && heights[st.top()] >=  heights[i] ) st.pop() ;
+
+            if ( st.empty() ) NSE[i] = n ;
+
+            else NSE[i] = st.top() ;
+
+            st.push(i) ;
+
+        }
+
+        return NSE ;
+
+    }
+
+        vector<int> getPSE( vector<int>& heights , int n ) {
+
+        stack<int> st ;
+        vector<int> PSE(n,0) ;
+
+        for ( int i = 0 ; i < n ; i++ ) {
+
+            while( !st.empty() && heights[st.top()] >=  heights[i] ) st.pop() ;
+
+            if ( st.empty() ) PSE[i] = -1 ;
+
+            else PSE[i] = st.top() ;
+
+            st.push(i) ;
+
+        }
+
+        return PSE ;
+
+    }
+
+    int largestRectangleArea(vector<int>& heights) {
+
+        int n = heights.size() ;
+        
+        // NSE --> next smaller element
+        // PSE --> previous smaller element
+        vector<int> NSE = getNSE(heights,n) ;
+        vector<int> PSE = getPSE(heights,n) ;
+
+        int maxi = 0 ;
+
+        for ( int i = 0 ; i < n ; i++ ) {
+
+            // area of rectangle = L X B or width * height
+            int length = NSE[i] - PSE[i] - 1 ;
+            int area = length * heights[i] ;
+            
+            maxi = max( maxi , area ) ;
+
+        }
+
+        return maxi ;
+
+        // getNSE()
+        // for loop → O(n)
+        // while → O(n) amortized (each element pushed/popped once)
+        // Vector + stack space → O(2n)
+        // T.C = O(2n), S.C = O(2n)
+
+        // getPSE()
+        // Same logic
+        // T.C = O(2n), S.C = O(2n)
+
+        // largestRectangleArea()
+        // getNSE() → O(2n)
+        // getPSE() → O(2n)
+        // Final for loop → O(n)
+
+        // So:
+
+        // T.C = O(2n) + O(2n) + O(2n) = O(5n)
+        // S.C = O(n)
+
+        // Final: Time = O(5n), Space = O(3n).
+        
+    }
+};
