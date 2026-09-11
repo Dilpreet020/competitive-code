@@ -1,0 +1,265 @@
+Approach: Implement Queue Using Two Stacks
+The idea is to implement FIFO (First In, First Out) behavior of a queue using stacks, which normally follow LIFO (Last In, First Out).
+
+We use two stacks:
+
+s1 → stores elements in queue order
+s2 → temporary stack used while inserting
+The important trick is to always keep the front element at the top of s1.
+
+1. push(x)
+Normally, a stack puts the new element on top.
+
+But for a queue, the oldest element must stay on top.
+
+Suppose:
+
+Queue: 1 → 2 → 3
+
+We want 1 to be at the top of s1:
+
+s1:
+
+top
+ ↓
+1
+2
+3
+
+Now we want to insert 4.
+
+First move everything from s1 to s2:
+
+while (!s1.empty()) {
+    s2.push(s1.top());
+    s1.pop();
+}
+
+Now:
+
+s1: empty
+
+s2:
+top
+ ↓
+3
+2
+1
+
+Then insert 4 into s1:
+
+s1.push(x);
+
+So:
+
+s1:
+top
+ ↓
+4
+
+Now move everything from s2 back to s1:
+
+while (!s2.empty()) {
+    s1.push(s2.top());
+    s2.pop();
+}
+
+Final:
+
+s1:
+top
+ ↓
+1
+2
+3
+4
+
+Perfect! The front of the queue (1) is again at the top.
+
+2. pop()
+Since the front element is always at the top of s1:
+
+int temp = s1.top();
+s1.pop();
+return temp;
+
+For:
+
+s1:
+top
+ ↓
+1
+2
+3
+
+pop() removes 1.
+
+Result:
+
+2
+3
+
+So it behaves exactly like a queue.
+
+3. peek()
+We simply return the top of s1:
+
+return s1.top();
+
+Since s1.top() is always the front of the queue, this gives the correct answer.
+
+4. empty()
+If s1 has no elements, the queue is empty:
+
+return s1.empty();
+
+Dry Run
+Let's perform:
+
+push(1)
+push(2)
+push(3)
+pop()
+peek()
+
+push(1)
+s1:
+1
+
+push(2)
+Move 1 to s2:
+
+s2:
+1
+
+Push 2:
+
+s1:
+2
+
+Move 1 back:
+
+s1:
+top
+ ↓
+1
+2
+
+push(3)
+After the same process:
+
+s1:
+top
+ ↓
+1
+2
+3
+
+pop()
+Removes:
+
+1
+
+Now:
+
+s1:
+2
+3
+
+peek()
+Returns:
+
+2
+
+So the behavior is:
+
+Queue: 1 → 2 → 3
+        ↓
+      FIFO
+
+Why s2 is needed
+The second stack temporarily reverses the elements.
+
+For example:
+
+s1:  1 2 3
+       ↓
+move to s2
+       ↓
+s2:  3 2 1
+
+This reversal allows us to insert the new element while eventually restoring the correct queue order in s1.
+
+Complexity
+push()
+We potentially move every existing element:
+
+s1 → s2 → s1
+
+So:
+
+Time: O(n)
+
+pop()
+Only one stack operation:
+
+Time: O(1)
+
+peek()
+Time: O(1)
+
+empty()
+Time: O(1)
+
+Space
+Two stacks together store all n elements:
+
+Space: O(n)
+
+So:
+
+Time:
+push  → O(n)
+pop   → O(1)
+peek  → O(1)
+empty → O(1)
+
+Space → O(n)
+
+CODE-
+
+class MyQueue {
+private:
+    stack<int> s1;
+    stack<int> s2;
+
+public:
+    MyQueue() {}
+
+    void push(int x) {
+        while (!s1.empty()) {
+            s2.push(s1.top());
+            s1.pop();
+        }
+        s1.push(x);
+        while (!s2.empty()) {
+            s1.push(s2.top());
+            s2.pop();
+        }
+    }
+
+    int pop() {
+        int temp = s1.top();
+        s1.pop();
+        return temp;
+    }
+
+    int peek() {
+        return s1.top();
+    }
+
+    bool empty() {
+        return s1.empty();
+    }
+};
+
