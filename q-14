@@ -1,0 +1,185 @@
+Approach: Longest Common Prefix
+The idea is to start with the first string as the prefix, then compare it with every other string and keep reducing the prefix until it matches.
+
+1. Take the first string as the initial prefix
+string pref = strs[0];
+int prefLen = pref.length();
+
+For:
+
+strs = ["flower", "flow", "flight"]
+
+Initially:
+
+pref = "flower"
+
+We assume the entire first string is the common prefix initially.
+
+2. Compare the prefix with every string
+Start from the second string:
+
+for (int i = 1; i < strs.size(); i++)
+
+For "flow":
+
+pref = "flower"
+s    = "flow"
+
+The prefix is longer than s, so we reduce it.
+
+while (prefLen > s.length() || pref != s.substr(0, prefLen))
+
+Here:
+
+"flower" → "flow"
+
+Now:
+
+pref = "flow"
+
+It matches "flow".
+
+3. Keep reducing when there is a mismatch
+Next string:
+
+s = "flight"
+pref = "flow"
+
+Compare:
+
+flow
+flig
+
+They don't match, so reduce:
+
+"flow" → "flo"
+"flo"  → "fl"
+
+Now:
+
+pref = "fl"
+
+"fl" matches the beginning of "flight".
+
+So the answer is:
+
+"fl"
+
+4. Why substr() is used
+This:
+
+s.substr(0, prefLen)
+
+takes the first prefLen characters of s.
+
+For example:
+
+s = "flight"
+prefLen = 2
+
+s.substr(0, 2) = "fl"
+
+Then we check:
+
+pref != s.substr(0, prefLen)
+
+If they are different, the prefix is too long, so we shorten it.
+
+5. What happens if there is no common prefix?
+Suppose:
+
+["dog", "racecar", "car"]
+
+Initially:
+
+pref = "dog"
+
+Compare with "racecar":
+
+dog
+rac
+
+Mismatch → reduce:
+
+do
+d
+
+Still mismatch.
+
+Eventually:
+
+prefLen = 0
+
+So:
+
+if (prefLen == 0)
+    return "";
+
+There is no common prefix.
+
+Dry Run
+For:
+
+["flower", "flow", "flight"]
+
+Initially
+pref = "flower"
+
+Compare with "flow"
+flower → flow
+
+Compare with "flight"
+flow → flo → fl
+
+Final:
+
+pref = "fl"
+
+Therefore:
+
+Answer = "fl"
+
+Why this approach works
+The important idea is:
+
+The longest common prefix of all strings must also be a prefix of the first string.
+
+So we can safely start with:
+
+pref = strs[0];
+
+Then every new string can only make the prefix smaller or equal, never larger.
+
+Complexity
+Let:
+
+n = number of strings
+m = length of the shortest string
+In the worst case, we compare characters across the strings, giving roughly:
+
+Time Complexity:  O(n × m)
+Space Complexity: O(m)
+
+CODE-
+class Solution {
+public:
+    string longestCommonPrefix(vector<string>& strs) {
+        if (strs.empty()) return "";
+
+        string pref = strs[0];
+        int prefLen = pref.length();
+
+        for (int i = 1; i < strs.size(); i++) {
+            string s = strs[i];
+            while (prefLen > s.length() || pref != s.substr(0, prefLen)) {
+                prefLen--;
+                if (prefLen == 0) {
+                    return "";
+                }
+                pref = pref.substr(0, prefLen);
+            }
+        }
+
+        return pref;        
+    }
+};
